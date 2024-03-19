@@ -35,7 +35,15 @@
 1. Pull new template changes down from the `template` remote address.
 
     ```
-    git pull template
+    git fetch --all
+
+    git merge --squash --no-commit template/main --allow-unrelated-histories
+    ```
+
+1. Fix any merge conflicts and commit the changes.
+
+    ```
+    git commit -m "chore(template): pull new changes"
     ```
 
 1. Check out your mainline branch.
