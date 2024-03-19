@@ -1884,4 +1884,3 @@ Providers.proposals = Proposals.init({
   required_burn_approvals = 1,
   required_mint_approvals = 1,
 })
-
