@@ -608,7 +608,7 @@ end
 ---local validator = Validator:init({
 ---  types = {
 ---    Quantity = Type:number("Invalid quantity (must be a number)"),
----    Sender = Type:string("Invalid type for Arweave address (must be string)"),
+---    From = Type:string("Invalid type for Arweave address (must be string)"),
 ---  },
 ---})
 ---
@@ -923,14 +923,14 @@ function token.transfer(sender, receiver, quantity)
 
   local validator = Validator:init({
     types = {
-      Sender = Type
-        :string("Cannot transfer tokens. Provided 'Sender' address must be a string.")
-        :length(43, nil, "Cannot transfer tokens. Provided 'Sender' address must be 43 characters.")
-        :match("[A-z0-9_-]+", "Cannot transfer tokens. Provided 'Sender' address has invalid characters."),
-      Receiver = Type
-        :string("Cannot transfer tokens. Provided 'Receiver' address must be a string.")
-        :length(43, nil, "Cannot transfer tokens. Provided 'Receiver' address must be 43 characters.")
-        :match("[A-z0-9_-]+", "Cannot transfer tokens. Provided 'Receiver' address has invalid characters."),
+      From = Type
+        :string("Cannot transfer tokens. Provided 'From' address must be a string.")
+        :length(43, nil, "Cannot transfer tokens. Provided 'From' address must be 43 characters.")
+        :match("[A-z0-9_-]+", "Cannot transfer tokens. Provided 'From' address has invalid characters."),
+      Recipient = Type
+        :string("Cannot transfer tokens. Provided 'Recipient' address must be a string.")
+        :length(43, nil, "Cannot transfer tokens. Provided 'Recipient' address must be 43 characters.")
+        :match("[A-z0-9_-]+", "Cannot transfer tokens. Provided 'Recipient' address has invalid characters."),
       Quantity = Type:number("Cannot transfer tokens. Provided 'Quantity' must be a number.")
         :integer("Cannot transfer tokens. Provided 'Quantity' must be an integer.")
         :greater_than(0, "Cannot transfer tokens. Provided 'Quantity' must be greater than 0."),
@@ -939,18 +939,18 @@ function token.transfer(sender, receiver, quantity)
 
   -- Validate addresses
   validator
-    :validate_type("Sender", sender)
-    :validate_type("Receiver", receiver)
+    :validate_type("From", sender)
+    :validate_type("Recipient", receiver)
 
-  -- Sender and receiver addresses should be different to prevent minting to the
+  -- From and receiver addresses should be different to prevent minting to the
   -- same address
-  assert(sender ~= receiver, "Cannot transfer tokens. Sender address cannot be the same as the Receiver address.")
+  assert(sender ~= receiver, "Cannot transfer tokens. From address cannot be the same as the Recipient address.")
 
   validator:validate_type("Quantity", quantity)
 
-  -- Sender should have enough tokens to make the transfer
-  assert(Balances[sender] ~= nil, "Cannot transfer tokens. No balance for Sender address '" .. sender .. "' found.")
-  assert(Balances[sender] >= quantity, "Cannot transfer tokens. Sender address '" .. sender .."' has insufficient balance.")
+  -- From should have enough tokens to make the transfer
+  assert(Balances[sender] ~= nil, "Cannot transfer tokens. No balance for From address '" .. sender .. "' found.")
+  assert(Balances[sender] >= quantity, "Cannot transfer tokens. From address '" .. sender .."' has insufficient balance.")
 
   -- move qty
   Balances[receiver] = (Balances[receiver] or 0) + quantity
@@ -1254,14 +1254,14 @@ function transfers.transfer_externally(sender, receiver, process, quantity)
 
   local validator = Validator:init({
     types = {
-      Sender = Type
-        :string("Cannot process external transfer. Transfer 'Sender' address must be a string.")
-        :length(43, nil, "Cannot process external transfer. Transfer 'Sender' address must be 43 characters.")
-        :match("[A-z0-9_-]+", "Cannot process external transfer. Transfer 'Sender' address has invalid characters."),
-      Receiver = Type
-        :string("Cannot process external transfer. Transfer 'Receiver' address must be a string.")
-        :length(43, nil, "Cannot process external transfer. Transfer 'Receiver' address must be 43 characters.")
-        :match("[A-z0-9_-]+", "Cannot process external transfer. Transfer 'Receiver' address has invalid characters."),
+      From = Type
+        :string("Cannot process external transfer. Transfer 'From' address must be a string.")
+        :length(43, nil, "Cannot process external transfer. Transfer 'From' address must be 43 characters.")
+        :match("[A-z0-9_-]+", "Cannot process external transfer. Transfer 'From' address has invalid characters."),
+      Recipient = Type
+        :string("Cannot process external transfer. Transfer 'Recipient' address must be a string.")
+        :length(43, nil, "Cannot process external transfer. Transfer 'Recipient' address must be 43 characters.")
+        :match("[A-z0-9_-]+", "Cannot process external transfer. Transfer 'Recipient' address has invalid characters."),
       Process = Type
         :string("Cannot process external transfer. Transfer 'Process' must be a string."),
       Quantity = Type:number("Cannot process external transfer. Tranfser 'Quantity' must be a number.")
@@ -1272,14 +1272,14 @@ function transfers.transfer_externally(sender, receiver, process, quantity)
 
   -- Validate addresses
   validator
-    :validate_type("Sender", sender)
-    :validate_type("Receiver", receiver)
+    :validate_type("From", sender)
+    :validate_type("Recipient", receiver)
     :validate_type("Quantity", quantity)
     :validate_type("Process", process)
 
   -- validate if the user has enough tokens
   assert(Balances[sender] ~= nil, "Cannot process external transfer. No balance for address '" .. sender .. "' found.")
-  assert(Balances[sender] >= quantity, "Cannot process external transfer. Sender address '" .. sender .."' has insufficient balance.")
+  assert(Balances[sender] >= quantity, "Cannot process external transfer. From address '" .. sender .."' has insufficient balance.")
 
   Balances[sender] = Balances[sender] - quantity
 end
@@ -1612,25 +1612,25 @@ function handlers.mint(payload)
   token.mint(payload.Target, payload.Quantity)
 end
 
----@alias TransferInternalPayload { Sender: string, Receiver: string, Quantity: number }
+---@alias TransferInternalPayload { From: string, Recipient: string, Quantity: number }
 ---Handle internal transfers. That is, transfer funds between addresses that are
 ---only in this process.
 ---@param payload TransferInternalPayload
 function handlers.handle_transfer_internally(payload)
-  token.transfer(payload.Sender, payload.Receiver, payload.Quantity)
-  emit.debit_notice(ThisProcessId, payload.Sender, tostring(payload.Quantity))
-  emit.credit_notice(ThisProcessId, payload.Receiver, tostring(payload.Quantity))
-  Providers.logger.info("Transferred " .. tostring(payload.Quantity) .. " " .. Ticker .. " from '" .. payload.Sender.. "' to receiver '" .. payload.Receiver .. "'")
+  token.transfer(payload.From, payload.Recipient, payload.Quantity)
+  emit.debit_notice(ThisProcessId, payload.From, tostring(payload.Quantity))
+  emit.credit_notice(ThisProcessId, payload.Recipient, tostring(payload.Quantity))
+  Providers.logger.info("Transferred " .. tostring(payload.Quantity) .. " " .. Ticker .. " from '" .. payload.From.. "' to receiver '" .. payload.Recipient .. "'")
 end
 
 ---TODO
----@alias TransferExternalPayload { Sender: string, Receiver: string, Quantity: number, Process: string }
+---@alias TransferExternalPayload { From: string, Recipient: string, Quantity: number, Process: string }
 ---Transfer tokens externally. That is, transfer funds from one address in this
 ---process to another address in another process.
 ---@param payload TransferExternalPayload
 function handlers.handle_transfer_externally(payload)
-  transfers.transfer_externally(payload.Sender, payload.Receiver, payload.Process, payload.Quantity)
-  Providers.logger.info("Transferred " .. tostring(payload.Quantity) .. " " .. Ticker .. " from '" .. payload.Sender .."' to process '" .. payload.Process .. "' and receiver '" .. payload.Receiver .. "'")
+  transfers.transfer_externally(payload.From, payload.Recipient, payload.Process, payload.Quantity)
+  Providers.logger.info("Transferred " .. tostring(payload.Quantity) .. " " .. Ticker .. " from '" .. payload.From .."' to process '" .. payload.Process .. "' and receiver '" .. payload.Recipient .. "'")
 end
 
 ---@alias BalancePayload { From: string, Target: string }
@@ -1798,8 +1798,7 @@ function _G.Call.Transfer(sender, receiver, quantity, process)
   if process ~= nil then
     call_action("Transfer", {
       ["Action-Type"] = "EXTERNAL",
-      Sender = sender,
-      Receiver = receiver,
+      Recipient = receiver,
       Process = process,
       Quantity = quantity
     })
@@ -1810,8 +1809,7 @@ function _G.Call.Transfer(sender, receiver, quantity, process)
   -- If a process is not provided, then we default to internal transfers
   call_action("Transfer", {
     ["Action-Type"] = "INTERNAL",
-    Sender = sender,
-    Receiver = receiver,
+    Recipient = receiver,
     Quantity = quantity
   })
 end
@@ -1850,10 +1848,10 @@ function _G.Call.TestAll()
   handlers.info()
 
   -- Should result in 18 tokens for this process
-  -- Shoudl result in 2 tokens for the Receiver address
+  -- Shoudl result in 2 tokens for the Recipient address
   handlers.handle_transfer_internally({
-    Sender = ThisProcessId,
-    Receiver = "p55NAQO-m8zmssDIn6m4naZBbUlPxYfk_SSFEohhvCs",
+    From = ThisProcessId,
+    Recipient = "p55NAQO-m8zmssDIn6m4naZBbUlPxYfk_SSFEohhvCs",
     Quantity = 2,
   })
 end

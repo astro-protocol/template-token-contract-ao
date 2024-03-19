@@ -337,8 +337,7 @@ describe("Action =", function()
         From = sender,
         Tags = {
           ["Action-Type"] = "INTERNAL",
-          Sender = sender,
-          Receiver = receiver,
+          Recipient = receiver,
           Quantity = "1"
         }
       }

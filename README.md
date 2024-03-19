@@ -152,8 +152,7 @@ Transfer tokens internall or externally.
       Target = "[this contract's ID (assigned when deployed in ao)]",
       Action = "Transfer",
       Tags = {
-         Sender = "[the address sending tokens]",
-         Receiver = "[the address receiving tokens]",
+         Recipient = "[the address receiving tokens]",
          Quantity = "[the number of tokens to transfer]"
       }
    })
@@ -185,8 +184,7 @@ _This call does not result in an `Output.data` value._
       Action = "Transfer",
       Tags = {
          ["Action-Type"] = "EXTERNAL",
-         Sender = "[the address sending tokens]",
-         Receiver = "[the address receiving tokens]",
+         Recipient = "[the address receiving tokens]",
          Quantity = "[the number of tokens to transfer]"
       }
    })
