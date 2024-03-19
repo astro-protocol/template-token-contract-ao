@@ -1758,48 +1758,6 @@ add_action("Transfer", function(payload)
   end
 end)
 
-add_action("Reset", function()
-  Balances = nil
-  Denomination = nil
-  Name = nil
-  Ticker = nil
-
-  Providers.output.json({
-    Balances = Balances or "nil",
-    Denomination = Denomination or "nil",
-    Name = Name or "nil",
-    Ticker = Ticker or "nil"
-  })
-end)
-
-add_action("Test-All", function()
-  -- Should result in 20 tokens for this process
-  handlers.mint({
-    From = ThisProcessId,
-    Target = ThisProcessId,
-    Quantity = 20,
-  })
-
-  handlers.create_new_burn_request({
-    Requestor = ThisProcessId,
-    Quantity = 1,
-  })
-
-  handlers.balance({ Address = ThisProcessId })
-
-  handlers.balances()
-
-  handlers.info()
-
-  -- Should result in 18 tokens for this process
-  -- Shoudl result in 2 tokens for the Receiver address
-  handlers.handle_transfer_internally({
-    Sender = ThisProcessId,
-    Receiver = "p55NAQO-m8zmssDIn6m4naZBbUlPxYfk_SSFEohhvCs",
-    Quantity = 2,
-  })
-end)
-
 -- /////////////////////////////////////////////////////////////////////////////
 -- // FILE MARKER - OWNER-ONLY HANDLER CALLS ///////////////////////////////////
 -- /////////////////////////////////////////////////////////////////////////////
@@ -1859,11 +1817,45 @@ function _G.Call.Transfer(sender, receiver, quantity, process)
 end
 
 function _G.Call.Reset()
-  call_action("Reset")
+  Balances = nil
+  Denomination = nil
+  Name = nil
+  Ticker = nil
+
+  Providers.output.json({
+    Balances = Balances or "nil",
+    Denomination = Denomination or "nil",
+    Name = Name or "nil",
+    Ticker = Ticker or "nil"
+  })
 end
 
 function _G.Call.TestAll()
-  call_action("Test-All")
+  -- Should result in 20 tokens for this process
+  handlers.mint({
+    From = ThisProcessId,
+    Target = ThisProcessId,
+    Quantity = 20,
+  })
+
+  handlers.create_new_burn_request({
+    Requestor = ThisProcessId,
+    Quantity = 1,
+  })
+
+  handlers.balance({ Address = ThisProcessId })
+
+  handlers.balances()
+
+  handlers.info()
+
+  -- Should result in 18 tokens for this process
+  -- Shoudl result in 2 tokens for the Receiver address
+  handlers.handle_transfer_internally({
+    Sender = ThisProcessId,
+    Receiver = "p55NAQO-m8zmssDIn6m4naZBbUlPxYfk_SSFEohhvCs",
+    Quantity = 2,
+  })
 end
 
 -- /////////////////////////////////////////////////////////////////////////////
