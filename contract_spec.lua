@@ -85,7 +85,7 @@ describe("Action =", function()
     Handlers.__handlers_added["Info"](msg)
 
     local expectedSend = {
-      Target = processId,
+      Target = msg.From,
       Tags = {
         Name = Name,
         Ticker = Ticker,
@@ -122,10 +122,11 @@ describe("Action =", function()
     Handlers.__handlers_added["Balance"](msg)
 
     local expectedSend = {
-      Target = processId,
+      Target = address,
+      Data = "190",
       Tags = {
-        Balance = 190,
-        Address = address,
+        Balance = "190",
+        Target = address,
         Ticker = Ticker
       }
     }
@@ -155,8 +156,8 @@ describe("Action =", function()
     Handlers.__handlers_added["Balances"](msg)
 
     local expectedSend = {
-      Target = processId,
-      Data = Balances
+      Target = anotherAddress,
+      Data = json.encode(Balances)
     }
 
     assert.spy(ao.send).was.called_with(expectedSend)
@@ -453,3 +454,4 @@ describe("Action =", function()
   --   end
   -- )
 end)
+

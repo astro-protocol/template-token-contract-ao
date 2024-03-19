@@ -1278,8 +1278,8 @@ function transfers.transfer_externally(sender, receiver, process, quantity)
     :validate_type("Process", process)
 
   -- validate if the user has enough tokens
-  assert(Balances[sender] ~= nil, "Cannot process internal transfer. No balance for address '" .. sender .. "' found.")
-  assert(Balances[sender] >= quantity, "Cannot process internal transfer. Sender address '" .. sender .."' has insufficient balance.")
+  assert(Balances[sender] ~= nil, "Cannot process external transfer. No balance for address '" .. sender .. "' found.")
+  assert(Balances[sender] >= quantity, "Cannot process external transfer. Sender address '" .. sender .."' has insufficient balance.")
 
   Balances[sender] = Balances[sender] - quantity
 end
@@ -1425,9 +1425,10 @@ end
 function emit.balance(to, balance_address, balance, ticker)
   ao.send({
     Target = to,
+    Data = tostring(balance),
     Tags = {
-      Balance = balance,
-      Address = balance_address,
+      Balance = tostring(balance),
+      Target = balance_address,
       Ticker = ticker,
     }
   })
@@ -1439,7 +1440,7 @@ end
 function emit.balances(to, balances)
   ao.send({
     Target = to,
-    Data = balances,
+    Data = json.encode(balances),
   })
 end
 
@@ -1632,48 +1633,55 @@ function handlers.handle_transfer_externally(payload)
   Providers.logger.info("Transferred " .. tostring(payload.Quantity) .. " " .. Ticker .. " from '" .. payload.Sender .."' to process '" .. payload.Process .. "' and receiver '" .. payload.Receiver .. "'")
 end
 
----@alias BalancePayload { Address: string }
+---@alias BalancePayload { From: string, Target: string }
 ---@param payload BalancePayload
 function handlers.balance(payload)
 
   -- Create the validator for this handler
   local validator = Validator:init({
     types = {
-      Address = Type
-        :string("Cannot get balance. Balance 'Address' must be a string.")
-        :length(43, nil, "Cannot get balance. Balance 'Address' must be 43 characters.")
-        :match("[A-z0-9_-]+", "Cannot get balance. Balance 'Address' has invalid characters."),
+      From = Type
+        :string("Cannot get balance. Field 'From' must be a string.")
+        :length(43, nil, "Cannot get balance. Field 'From' must be 43 characters.")
+        :match("[A-z0-9_-]+", "Cannot get balance. Field 'From' has invalid characters."),
+      Target = Type
+        :string("Cannot get balance. Balance 'Target' must be a string.")
+        :length(43, nil, "Cannot get balance. Balance 'Target' must be 43 characters.")
+        :match("[A-z0-9_-]+", "Cannot get balance. Balance 'Target' has invalid characters."),
     }
   })
 
   -- Validate the payload
   ---@type BalancePayload
   local valid = validator:validate_types(payload, {
-    "Address",
+    "Target",
+    "From",
   })
 
-  local output = {
-    Balance = token.balance(valid.Address),
-    Address = valid.Address,
+
+  local bal = token.balance(valid.Target)
+
+  emit.balance(valid.From, valid.Target, bal, Ticker)
+
+  Providers.output.json({
+    Target = valid.Target,
+    Balance = tostring(bal),
     Ticker = Ticker,
-  }
-
-  emit.balance(ThisProcessId, output.Address, output.Balance, output.Ticker)
-
-  Providers.output.json(output)
+  })
 end
 
+---@alias InfoPayload { From: string }
 ---@alias Info { Balances: Balances, Ticker: Ticker, Name: Name, Denomination: Denomination }
-function handlers.info()
+function handlers.info(payload)
   local tokenInfo = token.info()
-  emit.info(ThisProcessId, tokenInfo)
+  emit.info(payload.From, tokenInfo)
   Providers.output.json(tokenInfo)
 end
 
-
-function handlers.balances()
+---@alias BalancesPayload { From: string }
+function handlers.balances(payload)
   local balances = token.balances()
-  emit.balances(ThisProcessId, balances)
+  emit.balances(payload.From, balances)
   Providers.output.json(balances)
 end
 
@@ -1683,12 +1691,17 @@ end
 
 
 add_action("Balance", function(payload)
+  -- If Target is not provided, then return the sender's balance
+  if payload.Target == nil then
+    payload.Target = payload.From
+  end
+
   return handlers.balance(payload)
 end)
 
 
-add_action("Balances", function()
-  return handlers.balances()
+add_action("Balances", function(payload)
+  return handlers.balances(payload)
 end)
 
 add_action("Burn", function(payload)
@@ -1720,8 +1733,8 @@ add_action("Mint", function(payload)
   return handlers.mint(payload)
 end)
 
-add_action("Info", function()
-  return handlers.info()
+add_action("Info", function(payload)
+  return handlers.info(payload)
 end)
 
 add_action("Transfer", function(payload)
