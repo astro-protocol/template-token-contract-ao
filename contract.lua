@@ -1877,19 +1877,15 @@ token.init({
 
 transfers.init({
   authorized_external_targets = {
-
   }
 })
 
 Providers.proposals = Proposals.init({
   burners = {
-    ThisProcessId,
-    "iHcRPW6iSlQprUaoy9ibV9-hpIEpka_W01v4DY1ZUio",
   },
   minters = {
-    ThisProcessId,
-    "p55NAQO-m8zmssDIn6m4naZBbUlPxYfk_SSFEohhvCs",
   },
   required_burn_approvals = 1,
   required_mint_approvals = 1,
 })
+
