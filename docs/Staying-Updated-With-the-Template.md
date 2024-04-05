@@ -5,7 +5,6 @@
 - This method is just an example of how you can stay updated with the template (you are free to choose your own way)
 - This method assumes you have cloned the repo locally
 - This method assumes your mainline branch is `main`
-- This method assumes you have not split the `contract.lua` file into separate files
 - This method adds new remote address to your clone under the name `template`
 
 ## Steps
@@ -54,4 +53,4 @@
     git merge --no-ff template
     ```
 
-Your mainline branch's `contract.lua` file should now have the latest changes from the template.
+Your mainline branch's `contract_example.lua` file should now have the latest changes from the template.

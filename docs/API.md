@@ -1,16 +1,10 @@
-# Token Contract
+# API
 
-## Developer Guides
-
-- [Staying Updated With the Template](./docs/Staying-Updated-With-the-Template.md)
-
-## API
-
-### `Balance(address)`
+## `Balance(address)`
 
 Get a balance for an address in this contract.
 
-#### Example Calls
+### Example Calls
 
 ```lua
 Send({
@@ -22,7 +16,7 @@ Send({
 })
 ```
 
-#### Example Result `Output.data` Value
+### Example Result `Output.data` Value
 
 ```
 {
@@ -32,11 +26,11 @@ Send({
 }
 ```
 
-### `Balances()`
+## `Balances()`
 
 Get all balances for all addresses in this contract.
 
-#### Example Call
+### Example Call
 
 ```lua
 Send({
@@ -45,7 +39,7 @@ Send({
 })
 ```
 
-#### Example Result `Output.data` Value
+### Example Result `Output.data` Value
 
 ```
 {
@@ -54,11 +48,11 @@ Send({
 }
 ```
 
-### `Burn`
+## `Burn`
 
 Burn tokens assigned to your address.
 
-#### Example Calls
+### Example Calls
 
 ```lua
 Send({
@@ -70,7 +64,7 @@ Send({
 })
 ```
 
-#### Example Result `Output.data` Value
+### Example Result `Output.data` Value
 
 ```
 {
@@ -80,11 +74,11 @@ Send({
 }
 ```
 
-### `Info`
+## `Info`
 
 Get the token information contained in this contract.
 
-#### Example Calls
+### Example Calls
 
 ```lua
 Send({
@@ -93,7 +87,7 @@ Send({
 })
 ```
 
-#### Example Result `Output.data` Value
+### Example Result `Output.data` Value
 
 ```
 {
@@ -104,11 +98,11 @@ Send({
 }
 ```
 
-### `Mint`
+## `Mint`
 
 Mint new tokens and assign them to an address.
 
-#### Example Calls
+### Example Calls
 
 ```lua
 Send({
@@ -121,7 +115,7 @@ Send({
 })
 ```
 
-#### Example Result `Output.data` Value
+### Example Result `Output.data` Value
 
 ```
 {
@@ -131,11 +125,11 @@ Send({
 }
 ```
 
-### `Transfer`
+## `Transfer`
 
 Transfer tokens from your address to another address.
 
-#### Example Calls
+### Example Calls
 
 ```lua
 Send({
@@ -148,7 +142,7 @@ Send({
 })
 ```
 
-#### Example Result `Output.data` Value (Internal Transfers)
+### Example Result `Output.data` Value (Internal Transfers)
 
 ```
 {
