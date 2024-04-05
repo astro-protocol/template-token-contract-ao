@@ -2,7 +2,6 @@
 
 ## Developer Guides
 
-- [Development Helper Functions](./docs/Development-Helper-Functions.md)
 - [Staying Updated With the Template](./docs/Staying-Updated-With-the-Template.md)
 
 ## API
