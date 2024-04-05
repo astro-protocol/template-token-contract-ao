@@ -107,6 +107,7 @@ actions.add("Burn", function(payload)
   logger.info("Burned " .. tostring(payload.Quantity) .. " " .. Ticker .. " from '" .. payload.Caller .. "'")
 
   output.json({
+    target = payload.Caller,
     balance_new = tostring(balances.balance_new),
     balance_old = tostring(balances.balance_old),
   })
@@ -132,6 +133,7 @@ actions.add("Mint", function(payload)
   logger.info("Minted " .. stringQuantity .. " " .. Ticker .. " to '" .. payload.Target .. "'")
 
   output.json({
+    target = payload.Target,
     balance_new = balances.balance_new,
     balance_old = balances.balance_old,
   })
