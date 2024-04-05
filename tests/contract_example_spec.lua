@@ -82,7 +82,7 @@ _G.Ticker = "CT"
 -- /////////////////////////////////////////////////////////////////////////////
 
 describe("Action =", function()
-  test("Info", function()
+  test("Info -> returns token info", function()
 
     ao = mock(ao)
     output = mock(output)
@@ -181,6 +181,44 @@ describe("Action =", function()
     resetMocks({ ao = ao })
   end)
 
+  test("Mint -> mints tokens", function()
+    local caller = THIS_PROCESS_ID
+    local target = testing.utils.generateAddress()
+    
+    _G.output = mock(output)
+    _G.ao = mock(ao)
+    _G.Balances.SomeRandomAddress = bint("200")
+    _G.Balances[target] = bint("180")
+
+    Handlers.__handlers_added["Mint"]({
+      From = caller,
+      Tags = {
+        Target = target,
+        Quantity = "1",
+      }
+    })
+
+    -- Assert the balance is the initial balance (180) plus the quantity (1)
+    assert.same(bint("181"), Balances[target])
+
+    assert.spy(ao.send).was.called_with({
+      Target = caller,
+      Data = "Successfully minted 1 CT to '" .. target .. "'"
+    })
+
+    -- Assert a Credit-Notice was sent to the caller
+    assert.spy(ao.send).was.called_with({
+      Target = target,
+      Tags = {
+        Action = "Credit-Notice",
+        Sender = caller,
+        Quantity = "1"
+      }
+    })
+
+    resetMocks({ ao = ao })
+  end)
+
   test("Burn -> burns tokens", function()
     local caller = testing.utils.generateAddress()
     
@@ -212,47 +250,8 @@ describe("Action =", function()
     resetMocks({ ao = ao })
   end)
 
-  test("Mint -> errors when minter address is unauthorized",
-        function()
-    local qty = "18000000000000"
-    local target = testing.utils.generateAddress()
-    local minter = testing.utils.generateAddress()
-    local depositTxId = testing.utils.generateAddress()
-
-    ProposalAuthorities = {
-      minters = {
-        minter
-      }
-    }
-
-    ao = mock(ao)
-    output = mock(output)
-
-    local msg = {
-      From = target,
-      Tags = {
-        ["Deposit-Tx-Id"] = depositTxId,
-        ["Fee-Winston"] = "3600000000000",
-        ["Fee-USD"] = "57.82",
-        ["Currency-From-USD-Price"] = "289.08",
-        Target = target,
-        Quantity = qty
-      }
-    }
-
-    local env = {
-      Process = {
-        Id = processId
-      }
-    }
-
-    local success, res = pcall(function()
-      Handlers.__handlers_added["Deposit"](msg, env)
-    end, processId, target, qty)
-  end)
-
   test(
-    "Transfer (Action-Type = 'INTERNAL')",
+    "Transfer -> transfers tokens",
     function ()
       local sender = testing.utils.generateAddress()
       local receiver = testing.utils.generateAddress()
@@ -269,7 +268,6 @@ describe("Action =", function()
       local msg = {
         From = sender,
         Tags = {
-          ["Action-Type"] = "INTERNAL",
           Recipient = receiver,
           Quantity = "1"
         }
@@ -287,14 +285,14 @@ describe("Action =", function()
         bint(2)
       )
 
-      -- assert.spy(ao.send).was.called_with({
-      --   Target = processId,
-      --   Tags = {
-      --     Action = "Debit-Notice",
-      --     Quantity = "1",
-      --     Target = receiver
-      --   }
-      -- })
+      assert.spy(ao.send).was.called_with({
+        Target = sender,
+        Tags = {
+          Action = "Debit-Notice",
+          Quantity = "1",
+          Recipient = receiver
+        }
+      })
 
       assert.spy(ao.send).was.called_with({
         Target = receiver,

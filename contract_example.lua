@@ -3,6 +3,7 @@ local aolibs = require "src.aolibs"
 local emit = require "src.emit"
 local logger = require "src.logger"
 local output = require "src.output"
+local runtime = require "src.runtime"
 local Token = require "src.token"
 
 local json = aolibs.json
@@ -63,6 +64,10 @@ end
 ---@param payload MintPayload
 ---@return { balance_old: Bint, balance_new: Bint }
 function handlers.mint_tokens(payload)
+  if payload.Caller ~= THIS_PROCESS_ID then
+    runtime.throw("Unauthorized 'Mint' call from address '" .. payload.Caller .. "'")
+  end
+
   return token:mint(payload.Target, payload.Quantity)
 end
 
@@ -124,18 +129,19 @@ end)
 
 ---@param payload MintPayload
 actions.add("Mint", function(payload)
-  local balances = handlers.mint_tokens(payload)
+  local addressBalances = handlers.mint_tokens(payload)
 
   local stringQuantity = tostring(payload.Quantity)
 
-  emit.mint_success(THIS_PROCESS_ID, payload.Target, stringQuantity, Ticker)
+  emit.mint_success(payload.Caller, payload.Target, stringQuantity, Ticker)
+  emit.credit_notice(payload.Target, payload.Caller, stringQuantity)
 
   logger.info("Minted " .. stringQuantity .. " " .. Ticker .. " to '" .. payload.Target .. "'")
 
   output.json({
     target = payload.Target,
-    balance_new = balances.balance_new,
-    balance_old = balances.balance_old,
+    balance_new = addressBalances.balance_new,
+    balance_old = addressBalances.balance_old,
   })
 end)
 

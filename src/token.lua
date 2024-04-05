@@ -186,15 +186,14 @@ function mod:init(options)
 
     assertions.is_bint(quantity, "Cannot burn tokens. Quantity must be of type Bint.")
 
-    local stringTargetBalance = Balances[target]
+    local bintTargetBalance = Balances[target]
       
     -- Target should exist
-    assertions.is_not_nil(stringTargetBalance, "Cannot burn tokens. No balance for address '" .. target .. "' found.")
+    assertions.is_not_nil(bintTargetBalance, "Cannot burn tokens. No balance for address '" .. target .. "' found.")
 
     local balanceOld = Balances[target]
       
     -- Target should have enough tokens to burn
-    local bintTargetBalance = bint(stringTargetBalance)
     assert(bintTargetBalance >= quantity, "Cannot burn " .. tostring(quantity) .. " " .. Ticker .. ". Target address '" .. target .."' has insufficient balance: " .. tostring(bintTargetBalance) .. ".")
 
     balances.decrease(target, quantity)
@@ -231,7 +230,7 @@ function mod:init(options)
     -- From should have enough tokens to make the transfer
     assertions.is_not_nil(Balances[sender], "Cannot transfer tokens. No balance for From address '" .. sender .. "' found.")
 
-    local bintSenderBalance = bint(Balances[sender])
+    local bintSenderBalance = Balances[sender]
 
     ---Disabling next line because `__le` exists on `bint`
     ---@diagnostic disable-next-line
