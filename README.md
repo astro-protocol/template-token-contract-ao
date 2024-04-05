@@ -13,23 +13,15 @@ Get a balance for an address in this contract.
 
 #### Example Calls
 
-- If you are sending a message to this contract, you can use the following:
-
-   ```lua
-   Send({
-      Target = "[this contract's ID (assigned when deployed in ao)]",
-      Action = "Balance",
-      Tags = {
-         Address = "[the address in question]",
-      },
-   })
-   ```
-
-- If you are the contract owner, you can use the following shortened call:
-
-   ```lua
-   Call.Balance("[the address in question]")
-   ```
+```lua
+Send({
+   Target = "[this contract's ID (assigned when deployed in ao)]",
+   Action = "Balance",
+   Tags = {
+      Address = "[the address in question]",
+   },
+})
+```
 
 #### Example Result `Output.data` Value
 
@@ -45,35 +37,27 @@ Get a balance for an address in this contract.
 
 Get all balances for all addresses in this contract.
 
-#### Example Calls
+#### Example Call
 
-- If you are sending a message to this contract, you can use the following:
-
-   ```lua
-   Send({
-      Target = "[this contract's ID (assigned when deployed in ao)]",
-      Action = "Balances",
-   })
-   ```
-
-- If you are the contract owner, you can use the following shortened call:
-
-   ```lua
-   Call.Balances()
-   ```
+```lua
+Send({
+   Target = "[this contract's ID (assigned when deployed in ao)]",
+   Action = "Balances",
+})
+```
 
 #### Example Result `Output.data` Value
 
 ```
 {
-   "3mSK9FexnTCgGs7gLIo0VoRYU-IS81nTh3n3wkE_e9Y": 0,
-   "p55NAQO-m8zmssDIn6m4naZBbUlPxYfk_SSFEohhvCs": 1
+   "3mSK9FexnTCgGs7gLIo0VoRYU-IS81nTh3n3wkE_e9Y": "1000000000000",
+   "p55NAQO-m8zmssDIn6m4naZBbUlPxYfk_SSFEohhvCs": "2000000000000",
 }
 ```
 
 ### `Burn`
 
-TBC
+
 
 ### `Info`
 
