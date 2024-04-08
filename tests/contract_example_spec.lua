@@ -5,7 +5,7 @@ local output = require "src.output"
 local bint = aolibs.bint
 local json = aolibs.json
 
-local STUB_PRINT = false
+local STUB_PRINT = true
 
 -- /////////////////////////////////////////////////////////////////////////////
 -- // FILE MARKER - TEST SETUP /////////////////////////////////////////////////
