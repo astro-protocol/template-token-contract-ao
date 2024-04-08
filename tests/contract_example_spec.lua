@@ -5,7 +5,7 @@ local output = require "src.output"
 local bint = aolibs.bint
 local json = aolibs.json
 
-local STUB_PRINT = true
+local STUB_PRINT = false
 
 -- /////////////////////////////////////////////////////////////////////////////
 -- // FILE MARKER - TEST SETUP /////////////////////////////////////////////////
@@ -251,7 +251,7 @@ describe("Action =", function()
   end)
 
   test(
-    "Transfer -> transfers tokens",
+    "Transfer -> transfers tokens (send less than balance)",
     function ()
       local sender = testing.utils.generateAddress()
       local receiver = testing.utils.generateAddress()
@@ -295,6 +295,135 @@ describe("Action =", function()
       })
 
       assert.spy(ao.send).was.called_with({
+        Target = receiver,
+        Tags = {
+          Action = "Credit-Notice",
+          Quantity = "1",
+          Sender = sender,
+        }
+      })
+
+      resetMocks({ ao = ao })
+    end
+  )
+
+  test(
+    "Transfer -> transfers tokens (send total balance)",
+    function ()
+      local sender = testing.utils.generateAddress()
+      local receiver = testing.utils.generateAddress()
+
+      _G.Balances = {
+        [processId] = bint(50000),
+        [sender] = bint(199),
+        [receiver] = bint(3),
+      }
+
+      -- Set up global ao object
+      _G.ao = mock(ao)
+
+      local msg = {
+        From = sender,
+        Tags = {
+          Recipient = receiver,
+          Quantity = "199"
+        }
+      }
+
+      Handlers.__handlers_added["Transfer"](msg)
+
+      -- The sender's balance should be 199 - 199
+      assert.same(
+        Balances[sender],
+        bint(0)
+      )
+
+      -- The recipient's balance should be 199 + 3
+      assert.same(
+        Balances[receiver],
+        bint(202)
+      )
+
+      -- There should be no "Debit-Notice" call
+
+      assert.spy(ao.send).was.called_with({
+        Target = sender,
+        Tags = {
+          Action = "Debit-Notice",
+          Quantity = "199",
+          Recipient = receiver
+        }
+      })
+
+      -- There should be not "Credit-Notice" call
+
+      assert.spy(ao.send).was.called_with({
+        Target = receiver,
+        Tags = {
+          Action = "Credit-Notice",
+          Quantity = "199",
+          Sender = sender,
+        }
+      })
+    end
+  )
+
+  test(
+    "Transfer -> transfers tokens (send more than balance)",
+    function ()
+      local sender = testing.utils.generateAddress()
+      local receiver = testing.utils.generateAddress()
+
+      _G.Balances = {
+        [processId] = bint(50000),
+        [sender] = bint(199),
+        [receiver] = bint(3),
+      }
+
+      -- Set up global ao object
+      _G.ao = mock(ao)
+
+      local msg = {
+        From = sender,
+        Tags = {
+          Recipient = receiver,
+          Quantity = "200"
+        }
+      }
+
+      local status, err = pcall(function()
+        return Handlers.__handlers_added["Transfer"](msg)
+      end)
+
+      assert(not status)
+      assert(err.action == "Transfer")
+
+      -- The sender's balance should not change
+      assert.same(
+        Balances[sender],
+        bint(199)
+      )
+
+      -- The recipient's balance should not change
+      assert.same(
+        Balances[receiver],
+        bint(3)
+      )
+
+      -- There should be no "Debit-Notice" call
+
+      assert.spy(ao.send).was.not_called_with({
+        Target = sender,
+        Tags = {
+          Action = "Debit-Notice",
+          Quantity = "1",
+          Recipient = receiver
+        }
+      })
+
+      -- There should be not "Credit-Notice" call
+
+      assert.spy(ao.send).was.not_called_with({
         Target = receiver,
         Tags = {
           Action = "Credit-Notice",
