@@ -41,7 +41,11 @@ local function action_is(action)
   return Handlers.utils.hasMatchingTag("Action", action)
 end
 
+---@alias Error { action: string; message: string; payload: any }
+---
 ---Add an action to this process.
+---
+---If an error occurs, this action will throw an `Error` object.
 ---
 ---@param action string The name of the action that gets passed via `Action = "<action>"`.
 ---@param fn fun(msg, env) The action's function that gets called.
@@ -85,8 +89,6 @@ function mod.add(action, fn)
         payload = payload
       }, 2)
     end
-
-    print(status)
   end)
 end
 
