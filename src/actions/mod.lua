@@ -2,8 +2,6 @@ local aolibs = require "src.aolibs"
 local convert = require "src.convert"
 local runtime = require "src.runtime"
 
-local json = aolibs.json
-
 local mod = {}
 
 ---@alias IncomingMessage { Tags: table<string, string>, From: string }
@@ -30,7 +28,7 @@ local function msg_to_payload(msg)
   end
 
   -- Keep the original message intact if needed
-  payload.__original_message = msg
+  payload.__Message = msg
 
   return payload
 end

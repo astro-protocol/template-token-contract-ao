@@ -1,4 +1,6 @@
-# API
+# Contract API Reference
+
+This template comes with some default token APIs. They are outlined below.
 
 ## `Balance(address)`
 

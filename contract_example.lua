@@ -1,4 +1,4 @@
-local actions = require "src.actions"
+local actions = require "src.actions.mod"
 local aolibs = require "src.aolibs"
 local emit = require "src.emit"
 local logger = require "src.logger"
