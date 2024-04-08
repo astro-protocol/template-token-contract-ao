@@ -143,7 +143,7 @@ describe("Action =", function()
     assert.spy(ao.send).was.called_with(expectedSend)
 
     assert.spy(output.json).was.called_with({
-      Balance = bint("190"),
+      Balance = "190",
       Target = address,
       Ticker = Ticker
     })
@@ -170,12 +170,15 @@ describe("Action =", function()
 
     assert.spy(ao.send).was.called_with({
       Target = anotherAddress,
-      Data = json.encode(Balances)
+      Data = json.encode({
+        [processId] = tostring(bint("50000")),
+        [anotherAddress] = tostring(bint("190")),
+      })
     })
 
     assert.spy(output.json).was.called_with({
-      [processId] = bint("50000"),
-      [anotherAddress] = bint("190"),
+      [processId] = tostring(bint("50000")),
+      [anotherAddress] = tostring(bint("190")),
     })
 
     resetMocks({ ao = ao })

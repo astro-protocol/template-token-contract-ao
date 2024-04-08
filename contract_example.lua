@@ -89,16 +89,22 @@ actions.add("Balance", function(payload)
 
   emit.token_balance(payload.Caller, payload.Target, balanceAsString, Ticker)
 
-  output.json({ Target = payload.Target, Balance = balance, Ticker = Ticker })
+  output.json({ Target = payload.Target, Balance = balanceAsString, Ticker = Ticker })
 end)
 
 ---@param payload BalancesPayload
 actions.add("Balances", function(payload)
   local balances = handlers.get_token_balances(payload) or {}
 
-  emit.token_balances(payload.Caller, json.encode(balances))
+  local balancesAsStrings = {}
+
+  for address, balance in pairs(balances) do
+    balancesAsStrings[address] = tostring(balance)
+  end
+
+  emit.token_balances(payload.Caller, json.encode(balancesAsStrings))
   
-  output.json(balances)
+  output.json(balancesAsStrings)
 end)
 
 ---@param payload BurnPayload
