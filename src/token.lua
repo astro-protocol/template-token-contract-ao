@@ -19,40 +19,6 @@ local mod = {}
 
 local balances = {}
 
----Ensure the given `address` has a balance record.
----@param address string
-function balances.ensure_balance_exists(address)
-  Balances[address] = Balances[address] or bint("0")
-end
-
----Add the given `quantity` to the given `address`.
----@param address string
----@param quantity Bint
-function balances.increase(address, quantity)
-  balances.ensure_balance_exists(address)
-
-  ---Disabling next line because `__add` exists on `bint`
-  ---@diagnostic disable-next-line
-  Balances[address] = bint.__add(
-    Balances[address],
-    quantity
-  )
-end
-
----Subtract the given `quantity` from the given `address`.
----@param address string
----@param quantity Bint
-function balances.decrease(address, quantity)
-  balances.ensure_balance_exists(address)
-
-  ---Disabling next line because `__sub` exists on `bint`
-  ---@diagnostic disable-next-line
-  Balances[address] = bint.__sub(
-    Balances[address],
-    quantity
-  )
-end
-
 ---Initialize a token.
 ---
 ---@alias TokenOptions { globals: { Balances: Balances, Name: string, Ticker: string, Denomination: number, Logo?: string } }
@@ -190,13 +156,19 @@ function mod:init(options)
       
     -- Target should exist
     assertions.is_not_nil(bintTargetBalance, "Cannot burn tokens. No balance for address '" .. target .. "' found.")
-
-    local balanceOld = Balances[target]
       
     -- Target should have enough tokens to burn
     assert(bintTargetBalance >= quantity, "Cannot burn " .. tostring(quantity) .. " " .. Ticker .. ". Target address '" .. target .."' has insufficient balance: " .. tostring(bintTargetBalance) .. ".")
 
-    balances.decrease(target, quantity)
+    -- Track the current balance of the target
+
+    local balanceOld = Balances[target]
+
+    -- Decrease the balance for the target
+
+    ---Disabling next line because `__sub` exists on `bint`
+    ---@diagnostic disable-next-line
+    Balances[target] = bint.__sub(Balances[target], quantity)
 
     return {
       balance_old = balanceOld,
@@ -238,11 +210,28 @@ function mod:init(options)
       runtime.throw("Cannot transfer tokens. From address '" .. sender .."' has insufficient balance.")
     end
 
+    -- Ensure the recipient has a balance
+
+    Balances[recipient] = Balances[recipient] or bint("0")
+
+    -- Track the current balances for participants
+
     local senderBalanceOld = Balances[sender]
     local recipientBalanceOld = Balances[recipient]
 
-    balances.increase(recipient, quantity)
-    balances.decrease(sender, quantity)
+    -- Increase the balance for the recipient
+
+    ---Disabling next line because `__add` exists on `bint`
+    ---@diagnostic disable-next-line
+    Balances[recipient] = bint.__add(Balances[recipient], quantity)
+
+    -- Decrease the balance for the sender
+
+    ---Disabling next line because `__add` exists on `bint`
+    ---@diagnostic disable-next-line
+    Balances[sender] = bint.__sub( Balances[sender], quantity)
+
+    -- Send the information that was mutated to the caller
 
     return {
       recipient_balance_new = Balances[recipient],
@@ -268,9 +257,19 @@ function mod:init(options)
 
     assertions.is_bint(quantity, "Cannot mint tokens. Quantity must be of type bint.")
 
+    -- Ensure the target has a balance
+
+    Balances[target] = Balances[target] or bint("0")
+
+    -- Track the current balance of the target
+
     local balanceOld = Balances[target]
 
-    balances.increase(target, quantity)
+    -- Increase the balance for the target
+
+    ---Disabling next line because `__add` exists on `bint`
+    ---@diagnostic disable-next-line
+    Balances[target] = bint.__add(Balances[target], quantity)
 
     return {
       balance_old = balanceOld,
