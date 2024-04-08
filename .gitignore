@@ -1,6 +1,17 @@
 .vscode
+
+# LuaRocks
+
 *.tmp.lua/luarocks
 /lua
 /lua_modules
 /.luarocks
 /luarocks
+
+# scripts Directory
+
+/scripts/deploy
+
+# JWKs
+
+*.key.json
