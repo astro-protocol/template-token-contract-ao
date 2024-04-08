@@ -17,8 +17,6 @@ local json = aolibs.json
 
 local mod = {}
 
-local balances = {}
-
 ---Initialize a token.
 ---
 ---@alias TokenOptions { globals: { Balances: Balances, Name: string, Ticker: string, Denomination: number, Logo?: string } }
