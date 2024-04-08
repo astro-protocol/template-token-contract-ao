@@ -116,7 +116,7 @@ function mod:init(options)
 
     local total = bint("0")
 
-    for _i, value in ipairs(balances) do
+    for _i, value in pairs(balances) do
       ---@cast value Bint
       ---Disabling next line because `__add` exists on `bint`
       ---@diagnostic disable-next-line
