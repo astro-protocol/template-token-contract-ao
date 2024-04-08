@@ -204,7 +204,7 @@ function mod:init(options)
 
     local bintSenderBalance = Balances[sender]
 
-    ---Disabling next line because `__le` exists on `bint`
+    ---Disabling next line because `bint.__lt` exists
     ---@diagnostic disable-next-line
     if bint.__lt(bintSenderBalance, quantity) then
       runtime.throw("Cannot transfer tokens. From address '" .. sender .."' has insufficient balance.")
