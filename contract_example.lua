@@ -85,7 +85,7 @@ end
 actions.add("Balance", function(payload)
   local balance = handlers.get_token_balance(payload)
 
-  local balanceAsString = tostring(balance or "nil") -- should this be nil?
+  local balanceAsString = tostring(balance or 0)
 
   emit.token_balance(payload.Caller, payload.Target, balanceAsString, Ticker)
 
