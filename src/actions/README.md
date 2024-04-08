@@ -29,7 +29,7 @@ __Params__
 __Example Usage__
 
 ```lua
-local actions = require "src.actions"
+local actions = require "src.actions.mod"
 
 actions.add("Greet", function(payload)
 
