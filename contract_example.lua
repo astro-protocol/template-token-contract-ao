@@ -1,6 +1,7 @@
 local actions = require "src.actions.mod"
 local aolibs = require "src.aolibs"
 local emit = require "src.emit"
+local extensions = require "src.extensions.mod"
 local logger = require "src.logger"
 local output = require "src.output"
 local runtime = require "src.runtime"
@@ -98,11 +99,13 @@ actions.add("Balances", function(payload)
 
   local balancesAsStrings = {}
 
-  for address, balance in pairs(balances) do
+  for address, balance in extensions.tables.pairs_by_keys(balances) do
     balancesAsStrings[address] = tostring(balance)
   end
 
-  emit.token_balances(payload.Caller, json.encode(balancesAsStrings))
+  local sorted = extensions.tables.sort(balancesAsStrings)
+
+  emit.token_balances(payload.Caller, json.encode(sorted))
   
   output.json(balancesAsStrings)
 end)

@@ -41,13 +41,7 @@ function mod:init(options)
           :number("Cannot create token. Field `options.globals.Denomination` must be number")
           :integer("Cannot create token. Field `options.globals.Denomination` must be integer")
           :greater_than(0, "Cannot create token. Field `options.globals.Denomination` must be greater than 0"),
-        Balances = Type:custom("Cannot create token. Field `options.globals.Balances` must be of type table<string, string>", function(v)
-          if type(v) == "table" then
-            return true
-          end
-
-          return false
-        end),
+        Balances = Type:table("Cannot create token. Field `options.globals.Balances` must be of type table<string, Bint>"),
       }
     })
     :validate_types(globals)

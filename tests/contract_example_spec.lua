@@ -1,6 +1,7 @@
 local testing = require "arweave.testing"
 local aolibs = require "src.aolibs"
 local output = require "src.output"
+local extensions = require "src.extensions.mod"
 
 local bint = aolibs.bint
 local json = aolibs.json
@@ -168,18 +169,19 @@ describe("Action =", function()
 
     Handlers.__handlers_added["Balances"](msg)
 
-    assert.spy(ao.send).was.called_with({
-      Target = anotherAddress,
-      Data = json.encode({
-        [processId] = tostring(bint("50000")),
-        [anotherAddress] = tostring(bint("190")),
-      })
-    })
-
-    assert.spy(output.json).was.called_with({
+    local balancesAsStrings = {
       [processId] = tostring(bint("50000")),
       [anotherAddress] = tostring(bint("190")),
+    }
+
+    local sorted = extensions.tables.sort(balancesAsStrings)
+
+    assert.spy(ao.send).was.called_with({
+      Target = anotherAddress,
+      Data = json.encode(sorted)
     })
+
+    assert.spy(output.json).was.called_with(sorted)
 
     resetMocks({ ao = ao })
   end)

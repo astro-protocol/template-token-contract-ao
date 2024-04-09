@@ -15,3 +15,7 @@
 # JWKs
 
 *.key.json
+
+# Configs
+
+configs.lua
