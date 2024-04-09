@@ -149,8 +149,8 @@ actions.add("Mint", function(payload)
 
   output.json({
     target = payload.Target,
-    balance_new = addressBalances.balance_new,
-    balance_old = addressBalances.balance_old,
+    balance_new = tostring(addressBalances.balance_new),
+    balance_old = tostring(addressBalances.balance_old),
   })
 end)
 
