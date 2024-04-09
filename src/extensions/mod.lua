@@ -1,3 +1,5 @@
+local runtime = require "src.runtime"
+
 local mod = {
   tables = {}
 }
@@ -18,8 +20,15 @@ function mod.tables.pairs_by_keys(t, f)
 end
 
 function mod.tables.sort(t)
-  local ret = {}
+  if not t then
+    return {}
+  end
 
+  if type(t) ~= "table" then
+    runtime.throw("Cannot sort non-table value")
+  end
+  
+  local ret = {}
 
   for i, v in mod.tables.pairs_by_keys(t) do
     ret[i] = v

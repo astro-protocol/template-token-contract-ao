@@ -43,11 +43,33 @@ function Converter.init(v)
     return instance
   end
 
+  function instance.as_table()
+
+    ---Convert the table's values to strings.
+    ---@return table
+    instance.values_to_strings = function()
+
+      local tableToConvert = v
+      local ret = {}
+
+      for i, value in pairs(tableToConvert) do
+        ret[i] = tostring(value)
+      end
+
+      return ret
+    end
+
+    return instance
+  end
+
   return instance
 end
 
 function mod.value(v)
   return Converter.init(v)
+end
+function mod.table(v)
+  return Converter.init(v).as_table()
 end
 
 return mod

@@ -57,13 +57,6 @@ _G.ao = {
     return args
   end
 }
----Reset all mocks
----@param mocks any
-local function resetMocks(mocks)
-  if mocks.ao then
-    mocks.ao.send:clear()
-  end
-end
 
 if STUB_PRINT then
   print = stub(_G, "print")
@@ -82,11 +75,18 @@ _G.Ticker = "CT"
 -- // FILE MARKER - TESTS //////////////////////////////////////////////////////
 -- /////////////////////////////////////////////////////////////////////////////
 
-describe("Action =", function()
-  test("Info -> returns token info", function()
+ao = mock(ao)
+output = mock(output)
 
-    ao = mock(ao)
-    output = mock(output)
+describe("Action =", function()
+
+  before_each(function ()
+    ---Reset all mocks
+    ao.send:clear()
+    output.json:clear()
+  end)
+
+  test("Info -> returns token info", function()
 
     local msg = {
       From = "0x1337"
@@ -107,15 +107,10 @@ describe("Action =", function()
     assert.spy(ao.send).was.called_with(expectedSend)
 
     assert.spy(output.json).was.called_with(expectedSend.Tags)
-
-    resetMocks({ ao = ao })
   end)
 
   test("Balance -> returns balance", function()
     local address = testing.utils.generateAddress()
-    
-    _G.ao = mock(ao)
-    _G.output = mock(output)
 
     _G.Balances = {
       [processId] = bint("50000"),
@@ -148,15 +143,10 @@ describe("Action =", function()
       Target = address,
       Ticker = Ticker
     })
-
-    resetMocks({ ao = ao })
   end)
 
   test("Balances -> returns all balances", function()
     local anotherAddress = testing.utils.generateAddress()
-
-    _G.ao = mock(ao)
-    _G.output = mock(output)
 
     _G.Balances = {
       [processId] = bint("50000"),
@@ -182,16 +172,12 @@ describe("Action =", function()
     })
 
     assert.spy(output.json).was.called_with(sorted)
-
-    resetMocks({ ao = ao })
   end)
 
   test("Mint -> mints tokens", function()
     local caller = THIS_PROCESS_ID
     local target = testing.utils.generateAddress()
     
-    _G.output = mock(output)
-    _G.ao = mock(ao)
     _G.Balances.SomeRandomAddress = bint("200")
     _G.Balances[target] = bint("180")
 
@@ -221,14 +207,20 @@ describe("Action =", function()
       }
     })
 
-    resetMocks({ ao = ao })
+    local response = extensions.tables.sort({
+      target = target,
+      balance_new = tostring(bint("181")),
+      balance_old = tostring(bint("180")),
+    })
+
+    assert.spy(output.json).called(1)
+
+    assert.spy(output.json).was.called_with(response)
   end)
 
   test("Burn -> burns tokens", function()
     local caller = testing.utils.generateAddress()
     
-    _G.output = mock(output)
-    _G.ao = mock(ao)
     _G.Balances.SomeRandomAddress = bint("200")
     _G.Balances[caller] = bint("180")
 
@@ -252,7 +244,15 @@ describe("Action =", function()
       }
     })
 
-    resetMocks({ ao = ao })
+    local response = extensions.tables.sort({
+      target = caller,
+      balance_new = tostring(bint("179")),
+      balance_old = tostring(bint("180")),
+    })
+
+    assert.spy(output.json).called(1)
+
+    assert.spy(output.json).was.called_with(response)
   end)
 
   test(
@@ -266,9 +266,6 @@ describe("Action =", function()
         [sender] = bint(190),
         [receiver] = bint(1),
       }
-
-      -- Set up global ao object
-      _G.ao = mock(ao)
 
       local msg = {
         From = sender,
@@ -308,7 +305,16 @@ describe("Action =", function()
         }
       })
 
-      resetMocks({ ao = ao })
+      local response = extensions.tables.sort({
+        recipient_balance_new = tostring(bint("2")),
+        recipient_balance_old = tostring(bint("1")),
+        sender_balance_new = tostring(bint("189")),
+        sender_balance_old = tostring(bint("190")),
+      })
+
+      assert.spy(output.json).was.called(1)
+  
+      assert.spy(output.json).was.called_with(response)
     end
   )
 
@@ -323,9 +329,6 @@ describe("Action =", function()
         [sender] = bint(199),
         [receiver] = bint(3),
       }
-
-      -- Set up global ao object
-      _G.ao = mock(ao)
 
       local msg = {
         From = sender,
@@ -370,6 +373,17 @@ describe("Action =", function()
           Sender = sender,
         }
       })
+
+      local response = extensions.tables.sort({
+        recipient_balance_new = tostring(bint("202")),
+        recipient_balance_old = tostring(bint("3")),
+        sender_balance_new = tostring(bint("0")),
+        sender_balance_old = tostring(bint("199")),
+      })
+
+      assert.spy(output.json).was.called(1)
+  
+      assert.spy(output.json).was.called_with(response)
     end
   )
 
@@ -384,9 +398,6 @@ describe("Action =", function()
         [sender] = bint(199),
         [receiver] = bint(3),
       }
-
-      -- Set up global ao object
-      _G.ao = mock(ao)
 
       local msg = {
         From = sender,
@@ -436,6 +447,17 @@ describe("Action =", function()
           Sender = sender,
         }
       })
+
+      local response = extensions.tables.sort({
+        recipient_balance_new = tostring(bint("202")),
+        recipient_balance_old = tostring(bint("3")),
+        sender_balance_new = tostring(bint("0")),
+        sender_balance_old = tostring(bint("199")),
+      })
+  
+      assert.spy(output.json).was.called(0)
+
+      assert.spy(output.json).not_called_with(response)
     end
   )
 end)

@@ -1,5 +1,6 @@
 local actions = require "src.actions.mod"
 local aolibs = require "src.aolibs"
+local convert = require "src.convert"
 local emit = require "src.emit"
 local extensions = require "src.extensions.mod"
 local logger = require "src.logger"
@@ -97,11 +98,10 @@ end)
 actions.add("Balances", function(payload)
   local balances = handlers.get_token_balances(payload) or {}
 
-  local balancesAsStrings = {}
-
-  for address, balance in extensions.tables.pairs_by_keys(balances) do
-    balancesAsStrings[address] = tostring(balance)
-  end
+  local balancesAsStrings = convert
+    .table(balances)
+    .with_failure_message("Failed to read Balances return value")
+    .values_to_strings()
 
   local sorted = extensions.tables.sort(balancesAsStrings)
 
@@ -112,7 +112,7 @@ end)
 
 ---@param payload BurnPayload
 actions.add("Burn", function(payload)
-  local balances = handlers.burn_tokens(payload)
+  local addressBalances = handlers.burn_tokens(payload)
 
   local stringQuantity = tostring(payload.Quantity)
 
@@ -120,11 +120,14 @@ actions.add("Burn", function(payload)
   
   logger.info("Burned " .. tostring(payload.Quantity) .. " " .. Ticker .. " from '" .. payload.Caller .. "'")
 
-  output.json({
-    target = payload.Caller,
-    balance_new = tostring(balances.balance_new),
-    balance_old = tostring(balances.balance_old),
-  })
+  local response = convert
+    .table(addressBalances)
+    .with_failure_message("Failed to read Burn return value")
+    .values_to_strings()
+
+  response.target = payload.Caller
+
+  output.json(extensions.tables.sort(response))
 end)
 
 ---@param payload { Caller: string }
@@ -147,11 +150,14 @@ actions.add("Mint", function(payload)
 
   logger.info("Minted " .. stringQuantity .. " " .. Ticker .. " to '" .. payload.Target .. "'")
 
-  output.json({
-    target = payload.Target,
-    balance_new = tostring(addressBalances.balance_new),
-    balance_old = tostring(addressBalances.balance_old),
-  })
+  local response = convert
+    .table(addressBalances)
+    .with_failure_message("Failed to read Mint return value")
+    .values_to_strings()
+
+  response.target = payload.Target;
+
+  output.json(extensions.tables.sort(response))
 end)
 
 actions.add("Transfer", function(payload)
@@ -164,5 +170,10 @@ actions.add("Transfer", function(payload)
 
   logger.info("Transferred " .. stringQuantity .. " " .. Ticker .. " from '" .. payload.Caller.. "' to '" .. payload.Recipient .. "'")
 
-  output.json(memberBalances)
+  local response = convert
+    .table(memberBalances)
+    .with_failure_message("Failed to read Mint return value")
+    .values_to_strings()
+
+  output.json(response)
 end)
