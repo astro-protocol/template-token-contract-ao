@@ -78,7 +78,7 @@ function mod.add(action, fn)
     local cleanErrorMessage = ""
     
     if err then
-      cleanErrorMessage = string.gsub(err, ".+|message_body|", "")
+      cleanErrorMessage = string.gsub(err, ".+message_body|", "")
     end
 
     if SEND_AO_ERROR_MESSAGES == true and shouldThrow then
