@@ -6,7 +6,7 @@ local extensions = require "src.extensions.mod"
 local bint = aolibs.bint
 local json = aolibs.json
 
-local STUB_PRINT = true
+local STUB_PRINT = false
 
 -- /////////////////////////////////////////////////////////////////////////////
 -- // FILE MARKER - TEST SETUP /////////////////////////////////////////////////
@@ -78,7 +78,7 @@ _G.Ticker = "CT"
 ao = mock(ao)
 output = mock(output)
 
-describe("Action =", function()
+describe("#template_example Action =", function()
 
   before_each(function ()
     ---Reset all mocks
@@ -411,8 +411,11 @@ describe("Action =", function()
         return Handlers.__handlers_added["Transfer"](msg)
       end)
 
+      local jsonError = json.decode(err)
+
       assert(not status)
-      assert(err.action == "Transfer")
+      assert.same(jsonError.action, "Transfer")
+      assert.same(jsonError.message, "Cannot transfer tokens. From address '" .. sender .. "' has insufficient balance.")
 
       -- The sender's balance should not change
       assert.same(

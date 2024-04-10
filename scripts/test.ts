@@ -2,13 +2,21 @@ const watcher = Deno.watchFs("./");
 
 import { debounce } from "https://deno.land/std@0.207.0/async/debounce.ts";
 
+const argsArray = ["test"];
+
+const tags = Deno.args && Deno.args[0] ? Deno.args[0] : []
+
+if (tags) {
+  argsArray.push("--exclude-tags");
+  argsArray.push(tags);
+}
+
+argsArray.push(".")
+
 const cmd = new Deno.Command(
   "arweave",
   {
-    args: [
-      "test",
-      ".",
-    ],
+    args: argsArray,
   },
 );
 

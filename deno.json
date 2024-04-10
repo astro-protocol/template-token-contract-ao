@@ -1,6 +1,7 @@
 {
   "tasks": {
-    "test": "deno run -A scripts/test.ts",
+    "test": "deno run --allow-run --allow-read scripts/test.ts template_example",
+    "test:template": "deno run --allow-run --allow-read scripts/test.ts",
     "deploy": "./scripts/deploy"
   }
 }
