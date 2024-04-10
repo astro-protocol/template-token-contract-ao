@@ -178,18 +178,16 @@ function mod:init(options)
     Validator
       :init({
         types = {
-          Sender = Type:string("Cannot mint tokens. Target address must be a string."),
-          Recipient = Type:string("Cannot mint tokens. Target address must be a string."),
+          Sender = Type:string("Cannot transfer tokens. Recipient address must be a string."),
+          Recipient = Type:string("Cannot transfer tokens. Recipient address must be a string."),
         }
       })
       :validate_type("Sender", sender)
       :validate_type("Recipient", recipient)
 
-    -- From and receiver addresses should be different to prevent minting to the
-    -- same address
     assertions.is_not_same(sender, recipient, "Cannot transfer tokens. From address cannot be the same as the Recipient address.")
 
-    assertions.is_bint(quantity, "Cannot mint tokens. Quantity must be of type Bint.")
+    assertions.is_bint(quantity, "Cannot transfer tokens. Quantity must be of type Bint.")
 
     -- From should have enough tokens to make the transfer
     assertions.is_not_nil(Balances[sender], "Cannot transfer tokens. No balance for From address '" .. sender .. "' found.")
