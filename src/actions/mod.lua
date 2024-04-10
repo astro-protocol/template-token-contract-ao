@@ -2,6 +2,8 @@ local aolibs = require "src.aolibs"
 local convert = require "src.convert"
 local runtime = require "src.runtime"
 
+local json = aolibs.json
+
 local mod = {}
 
 ---@alias IncomingMessage { Tags: table<string, string>, From: string }
@@ -73,21 +75,28 @@ function mod.add(action, fn)
       print(debug.traceback())
     end
 
+    local cleanErrorMessage = ""
+    
+    if err then
+      cleanErrorMessage = string.gsub(err, ".+|message_body|", "")
+    end
+
     if SEND_AO_ERROR_MESSAGES == true and shouldThrow then
       ao.send({
         Target = msg.From,
         Action = action,
         ['Message-Id'] = msg.Id,
-        Error = err.message
+        Error = cleanErrorMessage
       })
     end
 
     if shouldThrow then
-      error({
+      error(json.encode({
+        caller = msg.From,
+        message_id = msg.Id,
         action = action,
-        message = err.message or err,
-        payload = payload
-      }, 2)
+        message = cleanErrorMessage
+      }), 2)
     end
   end)
 end

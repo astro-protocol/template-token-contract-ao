@@ -10,7 +10,7 @@ function mod.throw(message, level)
     level = 3
   end
 
-  error(message, level)
+  error("|message_body|" .. message, level)
 end
 
 function mod.require(module_name)
