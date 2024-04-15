@@ -178,7 +178,7 @@ function mod:init(options)
     Validator
       :init({
         types = {
-          Sender = Type:string("Cannot transfer tokens. Recipient address must be a string."),
+          Sender = Type:string("Cannot transfer tokens. From address must be a string."),
           Recipient = Type:string("Cannot transfer tokens. Recipient address must be a string."),
         }
       })
